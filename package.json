@@ -36,6 +36,8 @@
     "@types/eventemitter3": "^1.2.0",
     "@types/graphql": "^0.8.6",
     "@types/lodash": "4.14.42",
+    "@types/lodash.isobject": "3.0.2",
+    "@types/lodash.isstring": "4.0.2",
     "@types/mocha": "^2.2.31",
     "@types/node": "^7.0.5",
     "@types/sinon": "^1.16.31",
