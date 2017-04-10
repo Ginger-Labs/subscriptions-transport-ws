@@ -38,6 +38,7 @@ export interface ServerOptions {
   onConnect?: Function;
   onDisconnect?: Function;
   keepAlive?: number;
+  jsonReviver?: (key: any, value: any) => any;
   // contextValue?: any;
   // rootValue?: any;
   // formatResponse?: (Object) => Object;
@@ -52,9 +53,10 @@ export class SubscriptionServer {
   private onDisconnect: Function;
   private wsServer: WebSocket.Server;
   private subscriptionManager: SubscriptionManager;
+  private jsonReviver?: (key: any, value: any) => any;
 
   constructor(options: ServerOptions, socketOptions: WebSocket.IServerOptions) {
-    const {subscriptionManager, onSubscribe, onUnsubscribe, onConnect, onDisconnect, keepAlive} = options;
+    const {subscriptionManager, onSubscribe, onUnsubscribe, onConnect, onDisconnect, keepAlive, jsonReviver} = options;
 
     if (!subscriptionManager) {
       throw new Error('Must provide `subscriptionManager` to websocket server constructor.');
@@ -65,6 +67,7 @@ export class SubscriptionServer {
     this.onUnsubscribe = onUnsubscribe;
     this.onConnect = onConnect;
     this.onDisconnect = onDisconnect;
+    this.jsonReviver = jsonReviver;
 
     // init and connect websocket server to http
     this.wsServer = new WebSocket.Server(socketOptions || {});
@@ -133,7 +136,7 @@ export class SubscriptionServer {
     return (message: any) => {
       let parsedMessage: SubscribeMessage;
       try {
-        parsedMessage = JSON.parse(message);
+        parsedMessage = JSON.parse(message, this.jsonReviver);
       } catch (e) {
         this.sendSubscriptionFail(connection, null, {errors: [{message: e.message}]});
         return;
@@ -297,7 +300,7 @@ export class SubscriptionServer {
         // then terminates the actual network connection (sends FIN packet)
         // 1011: an unexpected condition prevented the request from being fulfilled
         // We are using setTimeout because we want the message to be flushed before
-        // disconnecting the client 
+        // disconnecting the client
         setTimeout(() => {
           connection.close(1011);
           connection.terminate();

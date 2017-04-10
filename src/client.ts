@@ -47,6 +47,7 @@ export interface ClientOptions {
   reconnect?: boolean;
   reconnectionAttempts?: number;
   connectionCallback?: (error: Error[], result?: any) => void;
+  jsonReviver?: (key: any, value: any) => any;
 }
 
 const DEFAULT_SUBSCRIPTION_TIMEOUT = 5000;
@@ -68,6 +69,7 @@ export class SubscriptionClient {
   private connectionCallback: any;
   private eventEmitter: EventEmitter;
   private wsImpl: any;
+  private jsonReviver?: (key: any, value: any) => any;
 
   constructor(url: string, options?: ClientOptions, webSocketImpl?: any) {
     const {
@@ -76,6 +78,7 @@ export class SubscriptionClient {
       timeout = DEFAULT_SUBSCRIPTION_TIMEOUT,
       reconnect = false,
       reconnectionAttempts = Infinity,
+      jsonReviver = undefined,
     } = (options || {});
 
     this.wsImpl = webSocketImpl || NativeWebSocket;
@@ -270,7 +273,7 @@ export class SubscriptionClient {
     this.client.onmessage = ({ data }: {data: any}) => {
       let parsedMessage: any;
       try {
-        parsedMessage = JSON.parse(data);
+        parsedMessage = JSON.parse(data, this.jsonReviver);
       } catch (e) {
         throw new Error(`Message must be JSON-parseable. Got: ${data}`);
       }
