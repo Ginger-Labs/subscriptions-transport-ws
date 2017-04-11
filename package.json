@@ -39,7 +39,7 @@
     "@types/lodash.isobject": "3.0.2",
     "@types/lodash.isstring": "4.0.2",
     "@types/mocha": "^2.2.31",
-    "@types/node": "^7.0.5",
+    "@types/node": "^6",
     "@types/sinon": "^1.16.31",
     "@types/ws": "0.0.38",
     "chai": "^3.5.0",
